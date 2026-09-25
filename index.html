@@ -27,30 +27,72 @@ html, body {
 
 #blackhole {
   position: fixed;
-  top: 50%;
+  top: -260px;
   left: 50%;
-  width: 900px;
-  height: 900px;
-  transform: translate(-50%, -50%);
+  width: 760px;
+  height: 760px;
+  transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(circle at center,
-    #000 0%,
-    #000 18%,
-    rgba(255,140,60,0.35) 22%,
-    rgba(255,90,30,0.18) 30%,
-    rgba(120,60,180,0.12) 45%,
-    rgba(20,10,40,0.08) 60%,
-    rgba(0,0,0,0) 75%
+  background:
+    radial-gradient(circle at 50% 50%, #030102 0%, #030102 57%, transparent 59%),
+    radial-gradient(circle at 50% 50%, transparent 57%, rgba(255,238,214,0.95) 60%, rgba(255,170,110,0.6) 64%, rgba(150,80,70,0.3) 69%, transparent 76%);
+  box-shadow:
+    0 0 90px 30px rgba(255,190,130,0.18),
+    0 0 200px 90px rgba(120,60,60,0.12);
+  animation: pulse 7s ease-in-out infinite;
+  z-index: -2;
+  pointer-events: none;
+}
+
+#blackhole::after {
+  content: "";
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: 46%;
+  height: 40%;
+  transform: translateX(-50%) rotate(3deg);
+  background: linear-gradient(180deg, rgba(255,225,190,0.85) 0%, rgba(220,130,70,0.5) 40%, rgba(120,60,50,0.15) 80%, transparent 100%);
+  filter: blur(3px);
+  border-radius: 50% 50% 40% 40%;
+}
+
+#jet {
+  position: fixed;
+  top: 260px;
+  left: 50%;
+  width: 220px;
+  height: 900px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg,
+    rgba(255,230,200,0.55) 0%,
+    rgba(230,150,90,0.28) 20%,
+    rgba(150,80,60,0.14) 45%,
+    rgba(60,30,30,0.05) 70%,
+    transparent 100%
   );
-  filter: blur(6px);
-  animation: pulse 6s ease-in-out infinite;
+  clip-path: polygon(38% 0%, 62% 0%, 78% 100%, 22% 100%);
+  filter: blur(4px);
+  z-index: -2;
+  pointer-events: none;
+}
+
+#companion {
+  position: fixed;
+  top: 62%;
+  left: 63%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a3a3a, #000 70%);
+  box-shadow: 0 0 6px 1px rgba(255,255,255,0.15);
   z-index: -1;
   pointer-events: none;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.85; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
 }
 
 body {
@@ -61,34 +103,14 @@ body {
   color: #fcfcfc;
 }
 
-#topbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  background: rgba(20, 20, 26, 0.35);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  z-index: 10;
-}
-
-#brand {
-  color: #fcfcfc;
-  font-size: 16px;
-  letter-spacing: 0.5px;
-  opacity: 0.9;
-}
-
 #clock {
+  position: fixed;
+  top: 16px;
+  left: 16px;
   color: #fcfcfc;
   font-family: "Noto Sans", sans-serif;
   font-size: 16px;
+  z-index: 10;
 }
 
 #discord {
@@ -127,7 +149,10 @@ body {
 }
 
 #accountWrap {
-  position: relative;
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
 }
 
 #loginLink {
@@ -146,8 +171,8 @@ body {
 }
 
 #avatarBtn {
-  width: 38px;
-  height: 38px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.6);
@@ -158,7 +183,7 @@ body {
   display: none;
   position: absolute;
   right: 0;
-  top: 52px;
+  top: 58px;
   background: rgba(20, 20, 26, 0.75);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -210,22 +235,22 @@ body {
 
 <canvas id="stars"></canvas>
 <div id="blackhole"></div>
+<div id="jet"></div>
+<div id="companion"></div>
 
-<div id="topbar">
-  <div id="clock"></div>
-  <div id="brand">Remporia</div>
-  <div id="accountWrap">
-    <a id="loginLink" href="#">
-      <svg width="18" height="18" viewBox="0 0 245 240" fill="#fcfcfc"><path d="M104.4 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.2-5 10.2-11.1.1-6.1-4.5-11.1-10.2-11.1zM140.9 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.3-5 10.3-11.1s-4.6-11.1-10.3-11.1z"/><path d="M189.5 20h-134C44.4 20 35 29.4 35 41.1v135.1c0 11.7 9.4 21.1 21.1 21.1h113.4l-5.3-18.5 12.8 11.9 12.1 11.2 21.5 19V41.1C210.6 29.4 201.2 20 189.5 20zm-38.6 131.7s-3.6-4.3-6.6-8.1c13.1-3.7 18.1-11.9 18.1-11.9-4.1 2.7-8 4.6-11.5 5.9-5 2.1-9.8 3.5-14.5 4.3-9.6 1.8-18.4 1.3-25.9-.1-5.7-1.1-10.6-2.6-14.7-4.3-2.3-.9-4.8-2-7.3-3.4-.3-.2-.6-.3-.9-.5-.2-.1-.3-.2-.4-.3-1.8-1-2.8-1.7-2.8-1.7s4.8 8 17.5 11.8c-3 3.8-6.7 8.3-6.7 8.3-22.1-.7-30.5-15.2-30.5-15.2 0-32.2 14.4-58.3 14.4-58.3 14.4-10.8 28.1-10.5 28.1-10.5l1 1.2c-18 5.2-26.3 13.1-26.3 13.1s2.2-1.2 5.9-2.9c10.7-4.7 19.2-6 22.7-6.3.6-.1 1.1-.2 1.7-.2 6.1-.8 13-1 20.2-.2 9.5 1.1 19.7 3.9 30.1 9.6 0 0-7.9-7.5-24.9-12.7l1.4-1.6s13.7-.3 28.1 10.5c0 0 14.4 26.1 14.4 58.3 0 0-8.5 14.5-30.6 15.2z"/></svg>
-      Log in
-    </a>
-    <img id="avatarBtn" src="">
-    <div id="dropdown">
-      <div class="name" id="shownName"></div>
-      <input id="renameInput" type="text" placeholder="new display name">
-      <button id="renameBtn">Save name</button>
-      <a id="logoutLink" href="#">Log out</a>
-    </div>
+<div id="clock"></div>
+
+<div id="accountWrap">
+  <a id="loginLink" href="#">
+    <svg width="18" height="18" viewBox="0 0 245 240" fill="#fcfcfc"><path d="M104.4 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.2-5 10.2-11.1.1-6.1-4.5-11.1-10.2-11.1zM140.9 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.3-5 10.3-11.1s-4.6-11.1-10.3-11.1z"/><path d="M189.5 20h-134C44.4 20 35 29.4 35 41.1v135.1c0 11.7 9.4 21.1 21.1 21.1h113.4l-5.3-18.5 12.8 11.9 12.1 11.2 21.5 19V41.1C210.6 29.4 201.2 20 189.5 20zm-38.6 131.7s-3.6-4.3-6.6-8.1c13.1-3.7 18.1-11.9 18.1-11.9-4.1 2.7-8 4.6-11.5 5.9-5 2.1-9.8 3.5-14.5 4.3-9.6 1.8-18.4 1.3-25.9-.1-5.7-1.1-10.6-2.6-14.7-4.3-2.3-.9-4.8-2-7.3-3.4-.3-.2-.6-.3-.9-.5-.2-.1-.3-.2-.4-.3-1.8-1-2.8-1.7-2.8-1.7s4.8 8 17.5 11.8c-3 3.8-6.7 8.3-6.7 8.3-22.1-.7-30.5-15.2-30.5-15.2 0-32.2 14.4-58.3 14.4-58.3 14.4-10.8 28.1-10.5 28.1-10.5l1 1.2c-18 5.2-26.3 13.1-26.3 13.1s2.2-1.2 5.9-2.9c10.7-4.7 19.2-6 22.7-6.3.6-.1 1.1-.2 1.7-.2 6.1-.8 13-1 20.2-.2 9.5 1.1 19.7 3.9 30.1 9.6 0 0-7.9-7.5-24.9-12.7l1.4-1.6s13.7-.3 28.1 10.5c0 0 14.4 26.1 14.4 58.3 0 0-8.5 14.5-30.6 15.2z"/></svg>
+    Log in
+  </a>
+  <img id="avatarBtn" src="">
+  <div id="dropdown">
+    <div class="name" id="shownName"></div>
+    <input id="renameInput" type="text" placeholder="new display name">
+    <button id="renameBtn">Save name</button>
+    <a id="logoutLink" href="#">Log out</a>
   </div>
 </div>
 
