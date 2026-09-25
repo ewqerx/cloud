@@ -23,6 +23,21 @@ body {
   font-size: 16px;
 }
 
+#discord {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  color: #fcfcfc;
+  font-family: "Noto Sans", sans-serif;
+  font-size: 16px;
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+#discord:hover {
+  opacity: 1;
+}
+
 #typer {
   color: #fcfcfc;
   font-size: 28px;
@@ -47,6 +62,8 @@ body {
 
 <div id="clock"></div>
 
+<a id="discord" href="https://discord.gg/xfPqt7m">Discord server</a>
+
 <div><span id="typer"></span><span id="cursor">&nbsp;</span></div>
 
 <script>
@@ -62,7 +79,7 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
-var words = ["Hello...", "Welcome to Remporia"];
+var words = ["Hello...", "Welcome to Remporia", "Flagless no flag bestest client"];
 var wordIndex = 0;
 var charIndex = 0;
 var deleting = false;
@@ -77,7 +94,7 @@ function loop() {
 
     if (charIndex === current.length) {
       deleting = true;
-      setTimeout(loop, 1200);
+      setTimeout(loop, 1800);
       return;
     }
   } else {
@@ -87,12 +104,12 @@ function loop() {
     if (charIndex === 0) {
       deleting = false;
       wordIndex = (wordIndex + 1) % words.length;
-      setTimeout(loop, 400);
+      setTimeout(loop, 600);
       return;
     }
   }
 
-  setTimeout(loop, deleting ? 50 : 90);
+  setTimeout(loop, deleting ? 90 : 140);
 }
 
 loop();
