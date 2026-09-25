@@ -73,11 +73,103 @@ body {
   0%, 50% { opacity: 1; }
   50.01%, 100% { opacity: 0; }
 }
+
+#accountWrap {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+}
+
+#loginLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fcfcfc;
+  font-family: "Noto Sans", sans-serif;
+  font-size: 14px;
+  text-decoration: none;
+  opacity: 0.85;
+}
+
+#loginLink:hover {
+  opacity: 1;
+}
+
+#avatarBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #fcfcfc;
+  display: none;
+}
+
+#dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 58px;
+  background: #232629;
+  border: 1px solid #fcfcfc;
+  border-radius: 4px;
+  padding: 10px;
+  min-width: 180px;
+  text-align: left;
+}
+
+#dropdown .name {
+  padding: 4px 6px;
+  font-size: 14px;
+  color: #fcfcfc;
+  opacity: 0.8;
+}
+
+#renameInput {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 6px;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #fcfcfc;
+  background: transparent;
+  color: #fcfcfc;
+  font-family: "Noto Sans", sans-serif;
+}
+
+#renameBtn, #dropdown a {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 6px;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #fcfcfc;
+  background: transparent;
+  color: #fcfcfc;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  font-family: "Noto Sans", sans-serif;
+}
 </style>
 </head>
 <body>
 
 <div id="clock"></div>
+
+<div id="accountWrap">
+  <a id="loginLink" href="#">
+    <svg width="18" height="18" viewBox="0 0 245 240" fill="#fcfcfc"><path d="M104.4 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.2-5 10.2-11.1.1-6.1-4.5-11.1-10.2-11.1zM140.9 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.3-5 10.3-11.1s-4.6-11.1-10.3-11.1z"/><path d="M189.5 20h-134C44.4 20 35 29.4 35 41.1v135.1c0 11.7 9.4 21.1 21.1 21.1h113.4l-5.3-18.5 12.8 11.9 12.1 11.2 21.5 19V41.1C210.6 29.4 201.2 20 189.5 20zm-38.6 131.7s-3.6-4.3-6.6-8.1c13.1-3.7 18.1-11.9 18.1-11.9-4.1 2.7-8 4.6-11.5 5.9-5 2.1-9.8 3.5-14.5 4.3-9.6 1.8-18.4 1.3-25.9-.1-5.7-1.1-10.6-2.6-14.7-4.3-2.3-.9-4.8-2-7.3-3.4-.3-.2-.6-.3-.9-.5-.2-.1-.3-.2-.4-.3-1.8-1-2.8-1.7-2.8-1.7s4.8 8 17.5 11.8c-3 3.8-6.7 8.3-6.7 8.3-22.1-.7-30.5-15.2-30.5-15.2 0-32.2 14.4-58.3 14.4-58.3 14.4-10.8 28.1-10.5 28.1-10.5l1 1.2c-18 5.2-26.3 13.1-26.3 13.1s2.2-1.2 5.9-2.9c10.7-4.7 19.2-6 22.7-6.3.6-.1 1.1-.2 1.7-.2 6.1-.8 13-1 20.2-.2 9.5 1.1 19.7 3.9 30.1 9.6 0 0-7.9-7.5-24.9-12.7l1.4-1.6s13.7-.3 28.1 10.5c0 0 14.4 26.1 14.4 58.3 0 0-8.5 14.5-30.6 15.2z"/></svg>
+    Log in
+  </a>
+  <img id="avatarBtn" src="">
+  <div id="dropdown">
+    <div class="name" id="shownName"></div>
+    <input id="renameInput" type="text" placeholder="new display name">
+    <button id="renameBtn">Save name</button>
+    <a id="logoutLink" href="#">Log out</a>
+  </div>
+</div>
 
 <a id="discord" href="https://discord.gg/ewpdmrrtPW">Discord server</a>
 
@@ -86,6 +178,8 @@ body {
 <div><span id="typer"></span><span id="cursor">&nbsp;</span></div>
 
 <script>
+var WORKER_ORIGIN = "https://little-bonus-c967.3mjjackson2.workers.dev";
+
 function pad(n) {
   return n < 10 ? "0" + n : n;
 }
@@ -132,6 +226,55 @@ function loop() {
 }
 
 loop();
+
+var loginLink = document.getElementById("loginLink");
+var avatarBtn = document.getElementById("avatarBtn");
+var dropdown = document.getElementById("dropdown");
+var shownName = document.getElementById("shownName");
+var renameInput = document.getElementById("renameInput");
+var logoutLink = document.getElementById("logoutLink");
+
+loginLink.href = WORKER_ORIGIN + "/discord/login?return=" + encodeURIComponent(location.href);
+
+async function loadAccount() {
+  try {
+    var res = await fetch(WORKER_ORIGIN + "/api/me", { credentials: "include" });
+    var data = await res.json();
+
+    if (data.loggedIn) {
+      loginLink.style.display = "none";
+      avatarBtn.style.display = "block";
+      avatarBtn.src = data.avatarUrl;
+      shownName.textContent = data.name;
+      renameInput.value = data.name;
+      logoutLink.href = WORKER_ORIGIN + "/discord/logout?return=" + encodeURIComponent(location.href);
+    }
+  } catch (e) {}
+}
+
+loadAccount();
+
+avatarBtn.addEventListener("click", function() {
+  dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+});
+
+document.addEventListener("click", function(e) {
+  if (!dropdown.contains(e.target) && e.target !== avatarBtn) {
+    dropdown.style.display = "none";
+  }
+});
+
+renameInput.parentElement.querySelector("#renameBtn").addEventListener("click", async function() {
+  var val = renameInput.value.trim();
+  if (!val) return;
+  await fetch(WORKER_ORIGIN + "/api/rename", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: val })
+  });
+  shownName.textContent = val;
+});
 </script>
 
 </body>
