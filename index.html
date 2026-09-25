@@ -15,8 +15,8 @@
   --text-dim: rgba(252, 252, 252, 0.8);
   --border: rgba(255, 255, 255, 0.55);
   --border-strong: #fcfcfc;
-  --star: 255, 255, 255;
   --dropdown-bg: rgba(28, 30, 36, 0.85);
+  --error: #ff8080;
 }
 
 html, body {
@@ -49,7 +49,6 @@ body {
   top: 16px;
   left: 16px;
   color: var(--text);
-  font-family: "Noto Sans", sans-serif;
   font-size: 16px;
   z-index: 10;
 }
@@ -59,7 +58,6 @@ body {
   bottom: 16px;
   left: 16px;
   color: var(--text);
-  font-family: "Noto Sans", sans-serif;
   font-size: 16px;
   text-decoration: none;
   opacity: 0.8;
@@ -101,14 +99,14 @@ body {
   align-items: center;
   justify-content: center;
   color: var(--text);
-  font-family: "Noto Sans", sans-serif;
   font-size: 20px;
   font-weight: 700;
-  text-decoration: none;
+  background: none;
+  cursor: pointer;
   padding: 16px 34px;
   border: 2px solid var(--border-strong);
   border-radius: 8px;
-  opacity: 1;
+  font-family: "Noto Sans", sans-serif;
 }
 
 #loginLink:hover {
@@ -122,6 +120,12 @@ body {
   cursor: pointer;
   border: 1px solid var(--border);
   display: none;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-2);
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
 }
 
 #dropdown {
@@ -135,7 +139,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 10px;
-  min-width: 180px;
+  min-width: 200px;
   text-align: left;
   z-index: 20;
 }
@@ -149,7 +153,6 @@ body {
 
 #renameInput {
   width: 100%;
-  box-sizing: border-box;
   margin-top: 6px;
   padding: 6px;
   border-radius: 4px;
@@ -159,10 +162,9 @@ body {
   font-family: "Noto Sans", sans-serif;
 }
 
-#renameBtn, #dropdown a {
+#renameBtn, #logoutBtn {
   display: block;
   width: 100%;
-  box-sizing: border-box;
   margin-top: 6px;
   padding: 6px;
   border-radius: 4px;
@@ -170,9 +172,108 @@ body {
   background: transparent;
   color: var(--text);
   cursor: pointer;
-  text-decoration: none;
   text-align: center;
   font-family: "Noto Sans", sans-serif;
+}
+
+/* ---- auth modal ---- */
+
+#authOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 30;
+  align-items: center;
+  justify-content: center;
+}
+
+#authModal {
+  width: 320px;
+  max-width: 90vw;
+  background: var(--dropdown-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  color: var(--text);
+}
+
+#authModal h3 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  text-align: center;
+}
+
+#authModal input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--text);
+  background: transparent;
+  color: var(--text);
+  font-family: "Noto Sans", sans-serif;
+  font-size: 14px;
+}
+
+#authModal button.primary {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 2px solid var(--border-strong);
+  background: none;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+#authModal button.primary:hover {
+  background: rgba(128, 128, 128, 0.12);
+}
+
+#authSwitch {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+#authSwitch a {
+  color: var(--text);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+#authClose {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--text-dim);
+}
+
+#authModal {
+  position: relative;
+}
+
+#authError {
+  color: var(--error);
+  font-size: 13px;
+  margin: -4px 0 10px 0;
+  min-height: 16px;
+}
+
+.authStep {
+  display: none;
+}
+
+.authStep.active {
+  display: block;
 }
 </style>
 </head>
@@ -183,13 +284,47 @@ body {
 <div id="clock"></div>
 
 <div id="accountWrap">
-  <a id="loginLink" href="#">Log in</a>
-  <img id="avatarBtn" src="">
+  <button id="loginLink">Log in</button>
+  <div id="avatarBtn"></div>
   <div id="dropdown">
     <div class="name" id="shownName"></div>
     <input id="renameInput" type="text" placeholder="new display name">
     <button id="renameBtn">Save name</button>
-    <a id="logoutLink" href="#">Log out</a>
+    <button id="logoutBtn">Log out</button>
+  </div>
+</div>
+
+<div id="authOverlay">
+  <div id="authModal">
+    <span id="authClose">&times;</span>
+
+    <!-- login -->
+    <div class="authStep active" id="stepLogin">
+      <h3>Log in</h3>
+      <div id="authError"></div>
+      <input id="loginEmail" type="email" placeholder="Email">
+      <input id="loginPassword" type="password" placeholder="Password">
+      <button class="primary" id="loginBtn">Log in</button>
+      <div id="authSwitch">No account yet? <a id="toSignup">Sign up</a></div>
+    </div>
+
+    <!-- sign up -->
+    <div class="authStep" id="stepSignup">
+      <h3>Sign up</h3>
+      <div id="signupError" class="authErrorText" style="color:var(--error);font-size:13px;margin:-4px 0 10px 0;min-height:16px;"></div>
+      <input id="signupEmail" type="email" placeholder="Email">
+      <input id="signupPassword" type="password" placeholder="Password (min 8 characters)">
+      <button class="primary" id="signupBtn">Send code</button>
+      <div id="authSwitch">Already have an account? <a id="toLogin">Log in</a></div>
+    </div>
+
+    <!-- verify code -->
+    <div class="authStep" id="stepVerify">
+      <h3>Check your email</h3>
+      <div id="verifyError" style="color:var(--error);font-size:13px;margin:-4px 0 10px 0;min-height:16px;"></div>
+      <input id="verifyCode" type="text" placeholder="6-digit code" maxlength="6">
+      <button class="primary" id="verifyBtn">Verify &amp; log in</button>
+    </div>
   </div>
 </div>
 
@@ -247,14 +382,56 @@ function loop() {
 
 loop();
 
+// ---------- account / auth ----------
+
 var loginLink = document.getElementById("loginLink");
 var avatarBtn = document.getElementById("avatarBtn");
 var dropdown = document.getElementById("dropdown");
 var shownName = document.getElementById("shownName");
 var renameInput = document.getElementById("renameInput");
-var logoutLink = document.getElementById("logoutLink");
+var logoutBtn = document.getElementById("logoutBtn");
 
-loginLink.href = WORKER_ORIGIN + "/discord/login?return=" + encodeURIComponent(location.href);
+var authOverlay = document.getElementById("authOverlay");
+var authClose = document.getElementById("authClose");
+var stepLogin = document.getElementById("stepLogin");
+var stepSignup = document.getElementById("stepSignup");
+var stepVerify = document.getElementById("stepVerify");
+
+var pendingSignupEmail = "";
+
+function showStep(step) {
+  [stepLogin, stepSignup, stepVerify].forEach(function (s) {
+    s.classList.remove("active");
+  });
+  step.classList.add("active");
+}
+
+function openAuth() {
+  authOverlay.style.display = "flex";
+  showStep(stepLogin);
+  document.getElementById("authError").textContent = "";
+}
+
+function closeAuth() {
+  authOverlay.style.display = "none";
+}
+
+loginLink.addEventListener("click", openAuth);
+authClose.addEventListener("click", closeAuth);
+authOverlay.addEventListener("click", function (e) {
+  if (e.target === authOverlay) closeAuth();
+});
+
+document.getElementById("toSignup").addEventListener("click", function () {
+  showStep(stepSignup);
+});
+document.getElementById("toLogin").addEventListener("click", function () {
+  showStep(stepLogin);
+});
+
+function setInitial(name) {
+  avatarBtn.textContent = (name || "?").trim().charAt(0).toUpperCase();
+}
 
 async function loadAccount() {
   try {
@@ -263,28 +440,30 @@ async function loadAccount() {
 
     if (data.loggedIn) {
       loginLink.style.display = "none";
-      avatarBtn.style.display = "block";
-      avatarBtn.src = data.avatarUrl;
+      avatarBtn.style.display = "flex";
+      setInitial(data.name);
       shownName.textContent = data.name;
       renameInput.value = data.name;
-      logoutLink.href = WORKER_ORIGIN + "/discord/logout?return=" + encodeURIComponent(location.href);
+    } else {
+      loginLink.style.display = "inline-flex";
+      avatarBtn.style.display = "none";
     }
   } catch (e) {}
 }
 
 loadAccount();
 
-avatarBtn.addEventListener("click", function() {
+avatarBtn.addEventListener("click", function () {
   dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
 });
 
-document.addEventListener("click", function(e) {
+document.addEventListener("click", function (e) {
   if (!dropdown.contains(e.target) && e.target !== avatarBtn) {
     dropdown.style.display = "none";
   }
 });
 
-renameInput.parentElement.querySelector("#renameBtn").addEventListener("click", async function() {
+document.getElementById("renameBtn").addEventListener("click", async function () {
   var val = renameInput.value.trim();
   if (!val) return;
   await fetch(WORKER_ORIGIN + "/api/rename", {
@@ -294,7 +473,90 @@ renameInput.parentElement.querySelector("#renameBtn").addEventListener("click", 
     body: JSON.stringify({ name: val })
   });
   shownName.textContent = val;
+  setInitial(val);
 });
+
+logoutBtn.addEventListener("click", async function () {
+  await fetch(WORKER_ORIGIN + "/api/logout", { method: "POST", credentials: "include" });
+  dropdown.style.display = "none";
+  loadAccount();
+});
+
+document.getElementById("loginBtn").addEventListener("click", async function () {
+  var email = document.getElementById("loginEmail").value.trim();
+  var password = document.getElementById("loginPassword").value;
+  var errBox = document.getElementById("authError");
+  errBox.textContent = "";
+
+  try {
+    var res = await fetch(WORKER_ORIGIN + "/api/login", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email, password: password })
+    });
+    var data = await res.json();
+    if (!res.ok) {
+      errBox.textContent = data.error || "Login failed.";
+      return;
+    }
+    closeAuth();
+    loadAccount();
+  } catch (e) {
+    errBox.textContent = "Something went wrong. Try again.";
+  }
+});
+
+document.getElementById("signupBtn").addEventListener("click", async function () {
+  var email = document.getElementById("signupEmail").value.trim();
+  var password = document.getElementById("signupPassword").value;
+  var errBox = document.getElementById("signupError");
+  errBox.textContent = "";
+
+  try {
+    var res = await fetch(WORKER_ORIGIN + "/api/signup", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email, password: password })
+    });
+    var data = await res.json();
+    if (!res.ok) {
+      errBox.textContent = data.error || "Sign up failed.";
+      return;
+    }
+    pendingSignupEmail = email;
+    showStep(stepVerify);
+  } catch (e) {
+    errBox.textContent = "Something went wrong. Try again.";
+  }
+});
+
+document.getElementById("verifyBtn").addEventListener("click", async function () {
+  var code = document.getElementById("verifyCode").value.trim();
+  var errBox = document.getElementById("verifyError");
+  errBox.textContent = "";
+
+  try {
+    var res = await fetch(WORKER_ORIGIN + "/api/verify", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: pendingSignupEmail, code: code })
+    });
+    var data = await res.json();
+    if (!res.ok) {
+      errBox.textContent = data.error || "Verification failed.";
+      return;
+    }
+    closeAuth();
+    loadAccount();
+  } catch (e) {
+    errBox.textContent = "Something went wrong. Try again.";
+  }
+});
+
+// ---------- starfield ----------
 
 var canvas = document.getElementById("stars");
 var ctx = canvas.getContext("2d");
@@ -337,7 +599,7 @@ resizeCanvas();
 makeStars();
 requestAnimationFrame(drawStars);
 
-window.addEventListener("resize", function() {
+window.addEventListener("resize", function () {
   resizeCanvas();
   makeStars();
 });
