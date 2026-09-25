@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Remporia</title>
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  background: #232629;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Noto Sans", sans-serif;
+}
+
+#clock {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  color: #fcfcfc;
+  font-family: "Noto Sans", sans-serif;
+  font-size: 16px;
+}
+
+#typer {
+  color: #fcfcfc;
+  font-size: 28px;
+  letter-spacing: 0.5px;
+}
+
+#cursor {
+  display: inline-block;
+  width: 3px;
+  background: #e0e0e0;
+  margin-left: 4px;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<div id="clock"></div>
+
+<div><span id="typer"></span><span id="cursor">&nbsp;</span></div>
+
+<script>
+function pad(n) {
+  return n < 10 ? "0" + n : n;
+}
+
+function updateClock() {
+  var now = new Date();
+  document.getElementById("clock").textContent = pad(now.getHours()) + ":" + pad(now.getMinutes());
+}
+
+updateClock();
+setInterval(updateClock, 1000);
+
+var words = ["Hello...", "Welcome to Remporia"];
+var wordIndex = 0;
+var charIndex = 0;
+var deleting = false;
+var typer = document.getElementById("typer");
+
+function loop() {
+  var current = words[wordIndex];
+
+  if (!deleting) {
+    charIndex++;
+    typer.textContent = current.substring(0, charIndex);
+
+    if (charIndex === current.length) {
+      deleting = true;
+      setTimeout(loop, 1200);
+      return;
+    }
+  } else {
+    charIndex--;
+    typer.textContent = current.substring(0, charIndex);
+
+    if (charIndex === 0) {
+      deleting = false;
+      wordIndex = (wordIndex + 1) % words.length;
+      setTimeout(loop, 400);
+      return;
+    }
+  }
+
+  setTimeout(loop, deleting ? 50 : 90);
+}
+
+loop();
+</script>
+
+</body>
+</html>
