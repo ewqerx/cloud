@@ -1,0 +1,247 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/open-sans/wght.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Open Sans Variable", system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+
+  --color-signal: var(--signal);
+  --color-alert: var(--alert);
+  --color-grid: var(--grid);
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.4);
+  --radius-xl: calc(var(--radius) * 1.8);
+
+  --animate-scan: scan 7s linear infinite;
+  --animate-rise: rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Dark-only by design: a cyber terminal doesn't get a light mode. */
+:root {
+  color-scheme: dark;
+  --background: oklch(0.12 0.006 250);
+  --foreground: oklch(0.9 0.008 250);
+  --card: oklch(0.15 0.006 250);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.14 0.006 250);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.97 0 0);
+  --primary-foreground: oklch(0.13 0 0);
+  --secondary: oklch(0.2 0.008 250);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.19 0.006 250);
+  --muted-foreground: oklch(0.62 0.012 250);
+  --accent: oklch(0.24 0 0);
+  --accent-foreground: var(--primary);
+  --destructive: oklch(0.68 0.22 22);
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(1 0 0 / 50%);
+  --radius: 0.375rem;
+
+  --signal: var(--primary);
+  --alert: oklch(0.68 0.24 18);
+  --grid: oklch(1 0 0 / 4.5%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans antialiased;
+  }
+  body {
+    @apply bg-background text-foreground min-h-dvh overflow-x-hidden;
+  }
+  ::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@keyframes scan {
+  from { transform: translate3d(0, -20vh, 0); }
+  to { transform: translate3d(0, 120vh, 0); }
+}
+
+@keyframes bh-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes glitch {
+  0%, 92%, 100% { transform: none; clip-path: inset(0 0 100% 0); }
+  93% { transform: translate3d(-4px, 0, 0); clip-path: inset(12% 0 64% 0); }
+  95% { transform: translate3d(5px, 0, 0); clip-path: inset(58% 0 18% 0); }
+  97% { transform: translate3d(-2px, 0, 0); clip-path: inset(34% 0 44% 0); }
+}
+
+@layer components {
+  /* Static grid + vignette. Painted once, never animated. */
+  .bg-cyber-grid {
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-position: -1px -1px;
+    mask-image: radial-gradient(ellipse 80% 70% at 30% 45%, #000 30%, transparent 100%);
+  }
+
+  .bg-scanlines {
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 2px,
+      oklch(0 0 0 / 22%) 2px 3px
+    );
+  }
+
+  /* Glitch layers on the wordmark: duplicated text, clipped slices. */
+  .glitch {
+    position: relative;
+  }
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    clip-path: inset(0 0 100% 0);
+    animation: glitch 6s steps(1) infinite;
+  }
+  .glitch::before {
+    color: var(--alert);
+    mix-blend-mode: screen;
+  }
+  .glitch::after {
+    color: var(--signal);
+    mix-blend-mode: screen;
+    animation-delay: 0.08s;
+  }
+
+  /* ---- black hole ---- */
+  .bh-anchor {
+    --bh-hot: oklch(1 0 0);
+    --bh-glow: oklch(0.92 0 0);
+    --bh-tilt: -12deg;
+    position: absolute;
+    width: min(130vw, 760px);
+    aspect-ratio: 1;
+    left: 50%;
+    top: 24%;
+    translate: -50% -50%;
+    opacity: 0.75;
+  }
+  @media (width >= 64rem) {
+    .bh-anchor {
+      width: min(105vmin, 1100px);
+      left: auto;
+      right: -14vmin;
+      top: 52%;
+      translate: 0 -50%;
+      opacity: 1;
+    }
+  }
+  .bh,
+  .bh-pulse {
+    position: absolute;
+    inset: 0;
+  }
+  .bh {
+    filter: blur(7px);
+    will-change: transform; /* own layer: blur is rasterized once */
+  }
+  .bh > * {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    border-radius: 50%;
+  }
+  .bh-pulse {
+    border-radius: 50%;
+    background: radial-gradient(closest-side, oklch(0.92 0 0 / 16%) 30%, oklch(0.92 0 0 / 5%) 60%, transparent);
+    animation: bh-pulse 9s ease-in-out infinite;
+  }
+  /* Far side of the disk, bent over the top and under the bottom of the shadow. */
+  .bh-lens {
+    width: 56%;
+    aspect-ratio: 1;
+    rotate: var(--bh-tilt);
+    background: radial-gradient(closest-side, transparent 72%, oklch(0.92 0 0 / 55%) 80%, oklch(0.92 0 0 / 18%) 90%, transparent);
+    mask-image: linear-gradient(to bottom, #000 0 30%, transparent 45% 55%, #000 70%);
+  }
+  .bh-disk {
+    width: 100%;
+    aspect-ratio: 1;
+    transform: rotate(var(--bh-tilt)) scaleY(0.2);
+    background: radial-gradient(
+      closest-side,
+      transparent 33%,
+      var(--bh-hot) 35%,
+      var(--bh-glow) 41%,
+      oklch(0.8 0 0 / 55%) 55%,
+      oklch(0.7 0 0 / 18%) 72%,
+      transparent 90%
+    );
+    /* Doppler beaming: the side spinning toward us is brighter. */
+    mask-image: conic-gradient(from 0deg, #000 0deg, oklch(0 0 0 / 35%) 180deg, #000 360deg);
+  }
+  .bh-disk-front {
+    clip-path: inset(50% 0 0 0);
+  }
+  .bh-shadow {
+    width: 33%;
+    aspect-ratio: 1;
+    background: #000;
+    box-shadow: 0 0 60px 20px #000;
+  }
+  .bh-photon {
+    width: 36%;
+    aspect-ratio: 1;
+    background: radial-gradient(closest-side, transparent 88%, var(--bh-hot) 93%, oklch(0.92 0 0 / 60%) 96%, transparent);
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
