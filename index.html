@@ -107,6 +107,12 @@
     </header>
     <main id="app"></main>
     <script>
+      const repo = "ewqerx/cloud";
+      const branch = "main";
+      const folder = "config";
+      const raw_base = "https://raw.githubusercontent.com/" + repo + "/" + branch + "/" + folder + "/";
+      const api_url = "https://api.github.com/repos/" + repo + "/contents/" + folder + "?ref=" + branch;
+
       const media = window.matchMedia("(prefers-color-scheme: dark)");
       const themeMeta = document.querySelector('meta[name="theme-color"]');
 
@@ -142,13 +148,15 @@
         app.append(card);
 
         try {
-          const res = await fetch("/configs/index.json", { cache: "no-store" });
-          if (!res.ok) throw new Error("missing");
-          const names = await res.json();
-          const files = Array.isArray(names) ? names.filter((n) => typeof n === "string" && valid_name.test(n)) : [];
+          const res = await fetch(api_url, { headers: { Accept: "application/vnd.github+json" } });
+          if (!res.ok) throw new Error("api");
+          const items = await res.json();
+          const files = Array.isArray(items)
+            ? items.filter((i) => i && i.type === "file" && valid_name.test(i.name)).map((i) => i.name).sort((a, b) => a.localeCompare(b))
+            : [];
 
           if (!files.length) {
-            card.append(el("div", "empty", "No configs listed yet."));
+            card.append(el("div", "empty", "No configs found."));
             return;
           }
 
@@ -161,7 +169,7 @@
           }
           card.append(list);
         } catch (e) {
-          card.append(el("div", "empty", "Add /configs/index.json with an array of file names to list configs here."));
+          card.append(el("div", "empty", "Could not load the config list right now. Direct config links still work."));
         }
       }
 
@@ -185,7 +193,7 @@
         app.append(card);
 
         try {
-          const res = await fetch("/configs/" + name, { cache: "no-store" });
+          const res = await fetch(raw_base + encodeURIComponent(name));
           if (!res.ok) throw new Error("not found");
           const raw = await res.text();
           let pretty = raw;
@@ -212,7 +220,7 @@
           });
 
           const rawLink = el("a", "btn", "Raw");
-          rawLink.href = "/configs/" + name;
+          rawLink.href = raw_base + encodeURIComponent(name);
           rawLink.target = "_blank";
           rawLink.rel = "noopener";
 
