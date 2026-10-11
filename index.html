@@ -1,16 +1,241 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#0b0d10" />
     <meta name="description" content="Remporia — a Minecraft 1.8.9 client." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://little-bonus-c967.3mjjackson2.workers.dev" crossorigin />
     <title>Remporia</title>
+    <style>
+      :root {
+        --bg: #fafafa;
+        --fg: #111418;
+        --muted: #6b7280;
+        --card: #ffffff;
+        --border: #e2e5ea;
+        --accent: #3b6df0;
+        --accent-fg: #ffffff;
+      }
+      :root[data-theme="dark"] {
+        --bg: #0b0d10;
+        --fg: #e8eaed;
+        --muted: #8b9099;
+        --card: #12151a;
+        --border: #22262d;
+        --accent: #5b8cff;
+        --accent-fg: #0b0d10;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 24px 20px 8px;
+      }
+      header a {
+        color: var(--fg);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: 0.2px;
+      }
+      header span { color: var(--muted); font-size: 13px; }
+      main { max-width: 760px; margin: 0 auto; padding: 16px 20px 64px; }
+      h1 { font-size: 22px; margin: 16px 0 4px; }
+      p.sub { color: var(--muted); margin: 0 0 20px; word-break: break-all; }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .list { display: flex; flex-direction: column; }
+      .list a {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 16px;
+        color: var(--fg);
+        text-decoration: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .list a:last-child { border-bottom: 0; }
+      .list a:hover { background: var(--bg); }
+      .list a small { color: var(--muted); }
+      .empty { padding: 20px 16px; color: var(--muted); }
+      .bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
+      button, .btn {
+        font: inherit;
+        color: var(--fg);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 7px 14px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      button.primary {
+        background: var(--accent);
+        color: var(--accent-fg);
+        border-color: var(--accent);
+      }
+      button:hover, .btn:hover { filter: brightness(1.08); }
+      pre {
+        margin: 0;
+        padding: 16px;
+        overflow: auto;
+        max-height: 70vh;
+        font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        white-space: pre;
+      }
+      .error { color: #e5484d; padding: 16px; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <header>
+      <a href="#">Remporia</a>
+      <span>Minecraft 1.8.9 client</span>
+    </header>
+    <main id="app"></main>
+    <script>
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+      function applyTheme() {
+        const dark = media.matches;
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+        themeMeta.setAttribute("content", dark ? "#0b0d10" : "#fafafa");
+      }
+
+      applyTheme();
+      media.addEventListener("change", applyTheme);
+
+      const app = document.getElementById("app");
+      const valid_name = /^[A-Za-z0-9._-]+\.json$/;
+
+      function el(tag, cls, text) {
+        const node = document.createElement(tag);
+        if (cls) node.className = cls;
+        if (text !== undefined) node.textContent = text;
+        return node;
+      }
+
+      function button(label, cls, on_click) {
+        const b = el("button", cls, label);
+        b.addEventListener("click", on_click);
+        return b;
+      }
+
+      async function show_home() {
+        app.append(el("h1", "", "Configs"), el("p", "sub", "Open a config with remporia.com#config/name.json"));
+
+        const card = el("div", "card");
+        app.append(card);
+
+        try {
+          const res = await fetch("/configs/index.json", { cache: "no-store" });
+          if (!res.ok) throw new Error("missing");
+          const names = await res.json();
+          const files = Array.isArray(names) ? names.filter((n) => typeof n === "string" && valid_name.test(n)) : [];
+
+          if (!files.length) {
+            card.append(el("div", "empty", "No configs listed yet."));
+            return;
+          }
+
+          const list = el("div", "list");
+          for (const name of files) {
+            const link = el("a");
+            link.href = "#config/" + encodeURIComponent(name);
+            link.append(el("span", "", name), el("small", "", "open"));
+            list.append(link);
+          }
+          card.append(list);
+        } catch (e) {
+          card.append(el("div", "empty", "Add /configs/index.json with an array of file names to list configs here."));
+        }
+      }
+
+      async function show_config(name) {
+        app.append(el("h1", "", name), el("p", "sub", "remporia.com#config/" + name));
+
+        if (!valid_name.test(name)) {
+          const card = el("div", "card");
+          card.append(el("div", "error", "Invalid config name."));
+          app.append(card);
+          return;
+        }
+
+        const bar = el("div", "bar");
+        const back = el("a", "btn", "Back");
+        back.href = "#";
+        bar.append(back);
+        app.append(bar);
+
+        const card = el("div", "card");
+        app.append(card);
+
+        try {
+          const res = await fetch("/configs/" + name, { cache: "no-store" });
+          if (!res.ok) throw new Error("not found");
+          const raw = await res.text();
+          let pretty = raw;
+
+          try {
+            pretty = JSON.stringify(JSON.parse(raw), null, 2);
+          } catch (e) {
+            pretty = raw;
+          }
+
+          const copy = button("Copy", "primary", async () => {
+            await navigator.clipboard.writeText(pretty);
+            copy.textContent = "Copied";
+            setTimeout(() => { copy.textContent = "Copy"; }, 1200);
+          });
+
+          const download = button("Download", "", () => {
+            const url = URL.createObjectURL(new Blob([pretty], { type: "application/json" }));
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = name;
+            a.click();
+            URL.revokeObjectURL(url);
+          });
+
+          const rawLink = el("a", "btn", "Raw");
+          rawLink.href = "/configs/" + name;
+          rawLink.target = "_blank";
+          rawLink.rel = "noopener";
+
+          bar.append(copy, download, rawLink);
+          card.append(el("pre", "", pretty));
+        } catch (e) {
+          card.append(el("div", "error", "Config not found."));
+        }
+      }
+
+      function render() {
+        app.replaceChildren();
+        const hash = decodeURIComponent(location.hash.slice(1));
+
+        if (hash.startsWith("config/")) {
+          show_config(hash.slice(7));
+        } else {
+          show_home();
+        }
+      }
+
+      window.addEventListener("hashchange", render);
+      render();
+    </script>
   </body>
 </html>
