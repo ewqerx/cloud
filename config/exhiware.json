@@ -15,7 +15,7 @@
         "Animations": true,
         "Animation Speed": 175.0,
         "Animation Type": "Ease Out",
-        "Slide Direction": "Right",
+        "Slide Direction": "None",
         "Name Case": "Lowercase",
         "Sort": "Length",
         "Suffix": true,
