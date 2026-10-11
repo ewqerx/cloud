@@ -1,0 +1,96 @@
+{
+  "modules": {
+    "HUD": {
+      "enabled": true,
+      "keybind": 0,
+      "values": {
+        "Theme": -4619389,
+        "Font": "Minecraft",
+        "Watermark": true,
+        "Style": "Novoline",
+        "Custom Text": "Adjust",
+        "Arraylist": true,
+        "Border": "None",
+        "Background": true,
+        "Animations": true,
+        "Animation Speed": 175.0,
+        "Animation Type": "Ease Out",
+        "Slide Direction": "Right",
+        "Name Case": "Lowercase",
+        "Sort": "Length",
+        "Suffix": true,
+        "Spacing": 0.0,
+        "Color Mode": "White",
+        "TargetHUD": true
+      }
+    },
+    "Killaura": {
+      "enabled": false,
+      "keybind": 19,
+      "values": {
+        "Target Mode": "Single",
+        "Priority": "Range",
+        "Rotations": "Normal",
+        "Range": 4.21,
+        "APS": 12.0,
+        "FOV": 152.73,
+        "Through Walls": true,
+        "Teams": true,
+        "Invisibles": true,
+        "Dead": false,
+        "Swing": true,
+        "AutoBlock": true,
+        "Criticals": true,
+        "Target Color": -65536,
+        "Raycast Color": -16711936
+      }
+    },
+    "DiscordRPC": {
+      "enabled": true,
+      "keybind": 0,
+      "values": {
+        "Hide server": false
+      }
+    },
+    "ESP": {
+      "enabled": true,
+      "keybind": 0,
+      "values": {
+        "Box": true,
+        "Color": -16711890,
+        "Health Bar": true,
+        "Absorption": -1442048,
+        "Armor Bar": true,
+        "Tags": true,
+        "Background": true,
+        "Show Self": true
+      }
+    },
+    "ClickGui": {
+      "enabled": false,
+      "keybind": 54,
+      "values": {
+        "Mode": "csgo"
+      }
+    },
+    "PostProcessing": {
+      "enabled": true,
+      "keybind": 0,
+      "values": {
+        "Blur": true,
+        "Blur Radius": 6.0,
+        "Shadow": true,
+        "Shadow Radius": 6.0
+      }
+    },
+    "InventoryMove": {
+      "enabled": true,
+      "keybind": 0,
+      "values": {
+        "Inventory": true
+      }
+    }
+  },
+  "alts": [
+  ]
+}
